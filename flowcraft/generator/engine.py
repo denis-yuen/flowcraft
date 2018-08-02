@@ -107,7 +107,7 @@ class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
                  pipeline_name="flowcraft", ignore_dependencies=False,
-                 auto_dependency=True, merge_params=True):
+                 auto_dependency=True, merge_params=True, export_params=False):
 
         self.processes = []
 
@@ -1404,6 +1404,22 @@ class NextflowGenerator:
         pipeline_to_json = self.render_pipeline()
         with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
             fh.write(pipeline_to_json)
+
+    def export_params(self):
+        """Export pipeline params as a JSON to stdout
+
+        This run mode iterates over the pipeline processes and exports the
+        params dictionary of each component as a JSON to stdout.
+        """
+
+        params_json = {}
+
+        # Skip first init process
+        for p in self.processes[1:]:
+            params_json[p.template] = p.params
+
+        # Flush params json to stdout
+        sys.stdout.write(json.dumps(params_json))
 
     def build(self):
         """Main pipeline builder
